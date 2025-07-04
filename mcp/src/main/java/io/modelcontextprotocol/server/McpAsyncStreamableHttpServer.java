@@ -65,7 +65,7 @@ public class McpAsyncStreamableHttpServer {
 
 	private static final Logger logger = LoggerFactory.getLogger(McpAsyncStreamableHttpServer.class);
 
-	private final StreamableHttpServerTransportProvider httpTransportProvider;
+	private final McpServerTransportProvider httpTransportProvider;
 
 	private final ObjectMapper objectMapper;
 
@@ -85,7 +85,7 @@ public class McpAsyncStreamableHttpServer {
 	/**
 	 * Creates a new McpAsyncStreamableHttpServer.
 	 */
-	McpAsyncStreamableHttpServer(StreamableHttpServerTransportProvider httpTransportProvider, ObjectMapper objectMapper,
+	McpAsyncStreamableHttpServer(McpServerTransportProvider httpTransportProvider, ObjectMapper objectMapper,
 			McpServerFeatures.Async features, Duration requestTimeout,
 			McpUriTemplateManagerFactory uriTemplateManagerFactory) {
 		this.httpTransportProvider = httpTransportProvider;
@@ -173,7 +173,6 @@ public class McpAsyncStreamableHttpServer {
 	 */
 	private void setupSessionFactory() {
 		setupNotificationHandlers();
-
 		httpTransportProvider.setStreamableHttpSessionFactory(sessionId -> new McpServerSession(sessionId,
 				requestTimeout, this::handleInitializeRequest, Mono::empty, requestHandlers, notificationHandlers));
 	}
@@ -635,6 +634,22 @@ public class McpAsyncStreamableHttpServer {
 			}
 
 			StreamableHttpServerTransportProvider httpTransportProvider = transportBuilder.build();
+
+			// Create server features
+			McpServerFeatures.Async features = new McpServerFeatures.Async(serverInfo, serverCapabilities, tools,
+					resources, resourceTemplates, prompts, completions, rootsChangeConsumers, instructions,
+					streamTools);
+
+			return new McpAsyncStreamableHttpServer(httpTransportProvider, objectMapper, features, requestTimeout,
+					uriTemplateManagerFactory);
+		}
+
+		/**
+		 * Builds the McpAsyncStreamableHttpServer instance using the given Streamable
+		 * HttpServerTransportProvider.
+		 */
+		public McpAsyncStreamableHttpServer build(McpServerTransportProvider httpTransportProvider) {
+			Assert.notNull(serverInfo, "Server info must be set");
 
 			// Create server features
 			McpServerFeatures.Async features = new McpServerFeatures.Async(serverInfo, serverCapabilities, tools,

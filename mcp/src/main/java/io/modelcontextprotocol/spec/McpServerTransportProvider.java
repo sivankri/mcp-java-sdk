@@ -40,6 +40,16 @@ public interface McpServerTransportProvider {
 	void setSessionFactory(McpServerSession.Factory sessionFactory);
 
 	/**
+	 * Sets the streamable session factory that will be used to create sessions for new
+	 * clients. An implementation of the MCP server MUST call this method before any
+	 * streamable MCP interactions take place.
+	 * @param sessionFactory the streamable session factory to be used for initiating
+	 * client sessions
+	 */
+	default void setStreamableHttpSessionFactory(McpServerSession.StreamableHttpSessionFactory sessionFactory) {
+	}
+
+	/**
 	 * Sends a notification to all connected clients.
 	 * @param method the name of the notification method to be called on the clients
 	 * @param params parameters to be sent with the notification

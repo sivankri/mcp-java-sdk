@@ -336,7 +336,7 @@ public class McpServerSession implements McpSession {
 				// TODO handle situation where already initialized!
 				McpSchema.InitializeRequest initializeRequest = transports.isEmpty() ? listeningTransport
 					.unmarshalFrom(request.params(), new TypeReference<McpSchema.InitializeRequest>() {
-					}) : transports.get(request.id())
+					}) : transports.get(String.valueOf(request.id()))
 						.unmarshalFrom(request.params(), new TypeReference<McpSchema.InitializeRequest>() {
 						});
 
@@ -345,8 +345,13 @@ public class McpServerSession implements McpSession {
 				resultMono = this.initRequestHandler.handle(initializeRequest);
 			}
 			else {
-				// TODO handle errors for communication to this session without
-				// initialization happening first
+				// Since we are handling with stateless, initialize would not happen for
+				// all sessions.
+				// So setting state as initialized for all requests which are not
+				// METHOD_INITIALIZE.
+				this.state.lazySet(STATE_INITIALIZED);
+				exchangeSink.tryEmitValue(new McpAsyncServerExchange(this, null, null));
+
 				var handler = this.requestHandlers.get(request.method());
 				if (handler == null) {
 					MethodNotFoundError error = getMethodNotFoundError(request.method());

@@ -18,6 +18,7 @@ import io.modelcontextprotocol.server.transport.StreamableHttpServerTransportPro
 import io.modelcontextprotocol.spec.McpServerSession;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.StreamableHttpSessionFactoryImpl;
 import io.modelcontextprotocol.util.Assert;
 import io.modelcontextprotocol.util.DeafaultMcpUriTemplateManagerFactory;
 import io.modelcontextprotocol.util.McpUriTemplateManagerFactory;
@@ -173,8 +174,13 @@ public class McpAsyncStreamableHttpServer {
 	 */
 	private void setupSessionFactory() {
 		setupNotificationHandlers();
-		httpTransportProvider.setStreamableHttpSessionFactory(sessionId -> new McpServerSession(sessionId,
-				requestTimeout, this::handleInitializeRequest, Mono::empty, requestHandlers, notificationHandlers));
+		httpTransportProvider.setStreamableHttpSessionFactory(new StreamableHttpSessionFactoryImpl(requestTimeout,
+				requestHandlers, notificationHandlers, this::handleInitializeRequest, Mono::empty, features));
+
+		// httpTransportProvider.setStreamableHttpSessionFactory(sessionId -> new
+		// McpServerSession(sessionId,
+		// requestTimeout, this::handleInitializeRequest, Mono::empty, requestHandlers,
+		// notificationHandlers));
 	}
 
 	/**
